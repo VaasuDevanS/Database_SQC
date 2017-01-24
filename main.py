@@ -196,8 +196,6 @@ def save_result():
 
     def all_details():
         
-        #data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"image":[str(to_bytes_mode.get()),str(to_bytes.get())],"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
-        
         book=Workbook()
         sheet1=book.add_sheet("Sheet1")
         
