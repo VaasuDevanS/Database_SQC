@@ -1189,7 +1189,7 @@ try:
     for i in range(strt,int(current_year)+1):
         years.append(str(i)+"-"+str(i+1))
 except:
-    years.append(str(current_year)+"-"+str(int(current_year+1)))
+    years.append(str(current_year)+"-"+str(int(current_year)+1))
 variable=StringVar(search)
 j=[]
 for i in years:
