@@ -24,7 +24,7 @@
     5. 'Sun Jan 22 19:50:25 2017' ------ > Overall layout was completed for add and update windows.
     6. 'Mon Jan 23 08:37:02 2017' ------ > Results label was added and fixed some bugs in result Display and Gender column was added.
     7. 'Mon Jan 23 17:01:22 2017' ------ > Search result algorithm was added and fixed some bugs in saving the year data.
-    8.
+    8. 'Tue Jan 24 12:54:16 2017' ------ > Photo algorithms were added and made the source code available in GitHub.
 
     Developed using Python 2.7.12 on Windows 8.1 64-bit os
     IDE Used: Wingware python IDE 101 v.5.1.12-1 (Free version).
@@ -42,7 +42,7 @@
 '''
 
 # (Built-in)         No Worries
-from Tkinter import Tk,Frame,Label,Button,Entry,Listbox,Menu,Scrollbar,OptionMenu,StringVar,BooleanVar,END,Canvas,Radiobutton,Checkbutton,Text,ACTIVE
+from Tkinter import Tk,Frame,Label,Button,Entry,Listbox,Menu,Scrollbar,OptionMenu,StringVar,BooleanVar,END,Canvas,Radiobutton,Checkbutton,Text,ACTIVE,Toplevel
 import tkMessageBox as msgbox
 from tkFileDialog import askopenfile,asksaveasfile,askdirectory
 from tkFont import Font
@@ -50,6 +50,7 @@ from datetime import datetime
 import os,shelve,webbrowser
 from urllib import urlopen
 import re    # re ------> Regular Expressions
+import StringIO
 
 # (Third party modules)
 ''' 
@@ -82,7 +83,10 @@ current_year=str(datetime.now().year)
 title="STUDENTS QUALITY COUNCIL Database-"+current_year   #Setting the window Title
 app.title(title)
 app.resizable(0,0)               # I Don't want the window to be resized. Also it will disable the maximize button
-app.geometry("1000x585+200+40")  # width X height + from-left + from-top
+app.geometry("1000x610+200+40")  # width X height + from-left + from-top
+
+
+
 
 try:
     os.mkdir("D:\\Database")
@@ -92,6 +96,17 @@ except:
 
 os.chdir("D:\\Database")
 database=shelve.open("Database.sqc")       # Opening the Connection between the database file and the program
+
+#img=Image.open("D:\Program_Files\Python\Database_Management_Software\icon.ico")
+#database['icon']=img.tobytes()
+
+#img=Image.open("D:\Program_Files\Python\Database_Management_Software\default_image.png").convert('L').resize((128,128))
+#database['default_image']=img.tobytes()
+
+icon=Image.frombytes("RGBA",(256,256),database['icon'])
+im=ImageTk.PhotoImage(icon)
+app.tk.call('wm','iconphoto',app._w,im)
+
 
 def clear(): # Control+l or Control+L function
     text_box.delete(0,END)
@@ -117,6 +132,11 @@ def clear(): # Control+l or Control+L function
     adv.config(state="disable")
     update.config(state="disable")
     delete.config(state="disable")
+    img=Image.frombytes("L",(128,128),database['default_image'])
+    avata=ImageTk.PhotoImage(img)
+    avatar_label=Label(canvas1,image=avata)
+    avatar_label.image=avata
+    avatar_label.place(x=340,y=17)    
     
 def save_result():
     pass
@@ -151,7 +171,7 @@ def add_record():
         if len(name_box.get())!=0 and len(dept_box.get())!=0 and len(contact_box.get())!=0 and len(reg_box.get())!=0:
             
             otherrr=re.sub("\n","",other.get("1.0",END))
-            data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
+            data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"image":[str(to_bytes_mode.get()),str(to_bytes.get())],"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
             
             database[reg_box.get()]=data
             
@@ -163,9 +183,26 @@ def add_record():
             add.focus_force()
     
 
-    add=Tk()
-    add.geometry("500x445+645+143")
+    add=Toplevel()
+    add.geometry("500x445+645+142")
     add.title("Insert new record")
+    
+    def Add_Image():
+        
+        myFormats=[('JPEG / JFIF','*.jpg'),('Portable Network Graphics','*.png'),('Windows Bitmap','*.bmp'),]
+        path=askopenfile(title="Open Image",filetypes=myFormats) 
+        add.focus_force()
+
+        try:
+        
+            client=Image.open(path.name).resize((128,128),Image.ANTIALIAS)
+            to_bytes_mode.set(str(client.mode))
+            to_bytes.set(client.tobytes())
+            
+            
+        except:
+            pass
+        
     
     canvas1=Canvas(add,width=600,height=550)
     
@@ -177,11 +214,32 @@ def add_record():
     
     reg_box.focus_force()
     
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    add.tk.call('wm','iconphoto',add._w,im)
+        
+    im=Image.frombytes("L",(128,128),database['default_image'])
+    avata=ImageTk.PhotoImage(im)
+    avatar_label=Label(add,image=avata)
+    avatar_label.image=avata
+    avatar_label.place(x=340,y=10,height=80) 
+    
+    to_bytes=StringVar(canvas1)
+    to_bytes_mode=StringVar(canvas1)
+    
+    to_bytes.set(database['default_image'])
+    to_bytes_mode.set("L")
+
+    img_butt=Button(canvas1,text="Add Image",command=Add_Image)
+    img_butt.place(x=370,y=100)
+        
     name=Label(canvas1,text="Name")
     name.place(x=20,y=50)
     
     name_box=Entry(canvas1)
     name_box.place(x=100,y=50)
+    
+    
     
     dept=Label(canvas1,text="Department")
     dept.place(x=20,y=85)
@@ -413,7 +471,18 @@ def show_result(*ignore):
         other_info.insert(END,database[my_no]['other'])
         other_info.config(state="disable")
         blood_var.set(database[my_no]['blood'])
-        dob_var.set(database[my_no]['dob'])          
+        dob_var.set(database[my_no]['dob'])      
+        
+        try:
+            img=Image.frombytes(database[my_no]['image'][0],(128,128),database[my_no]['image'][1])
+            avata=ImageTk.PhotoImage(img)
+            avatar_label=Label(canvas1,image=avata)
+            avatar_label.image=avata 
+            avatar_label.place(x=340,y=17)
+            
+        except:
+            pass
+        
         
     except:
         
@@ -444,7 +513,6 @@ def search_result():
     update.config(state="disable")
     delete.config(state="disable")    
     
-    total=len(database.keys())
     key_word=text_box.get().split()
     key_word=[i.lower() for i in key_word]
     bresults,results=[],[]
@@ -452,7 +520,10 @@ def search_result():
     
     given_year=variable.get()
         
-    for i in database:
+    my_keys=[i for i in database.keys() if i.isdigit()]
+    total=len(my_keys)
+        
+    for i in my_keys:
         
         total_data=re.sub("\s","",database[i]['name']+database[i]['hos_days']+database[i]['gender']+database[i]['act_unact']+database[i]['dept']+database[i]['contact']+database[i]['blood']+database[i]['native']+database[i]['email']+i).lower()
         
@@ -492,9 +563,7 @@ def search_result():
                             YY['IV Year'].append(i)
                 else:
                     YY['IV Year'].append(i)                    
-                    
-
-                    
+                                        
         else:
             
             if first.get()==True:
@@ -572,24 +641,37 @@ def search_result():
         pass
     try:
         i2=bresults.index("  Second Year")
-        list_box.itemconfig(i2,{'fg':'green'})
+        list_box.itemconfig(i2,{'fg':'blue'})
     except:
         pass
     try:
         i3=bresults.index("   Third Year")
-        list_box.itemconfig(i3,{'fg':'red'})
+        list_box.itemconfig(i3,{'fg':'blue'})
     except:
         pass
     try:
         i4=bresults.index("  Fourth Year")
-        list_box.itemconfig(i4,{'fg':'orange'})
+        list_box.itemconfig(i4,{'fg':'blue'})
     except:
         pass
+    
+    results=[]+bresults
+    try:results.remove("  First Year")
+    except:pass
+    
+    try:results.remove("  Second Year")
+    except:pass
+    
+    try:results.remove("   Third Year")
+    except:pass
+    
+    try:results.remove("  Fourth Year")
+    except:pass    
     
         
     found_var.set("Found "+str(len(results))+" / "+str(total))
     
-    if len(results)==0:
+    if len(bresults)==0:
         adv.config(state="disable")
         delete.config(state="disable")
         update.config(state="disable")   
@@ -608,7 +690,7 @@ def update_record():
         if len(name_box.get())!=0 and len(dept_box.get())!=0 and len(contact_box.get())!=0 and len(reg_box.get())!=0:
             
             otherrr=re.sub("\n","",otherr.get("1.0",END))
-            data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
+            data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"image":[str(to_bytes_mode.get()),str(to_bytes.get())],"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
                        
             del database[reg_var.get()]
             database[reg_box.get()]=data
@@ -636,7 +718,12 @@ def update_record():
             text_box.focus_force()
             adv.config(state="disable")
             update.config(state="disable")
-            delete.config(state="disable")            
+            delete.config(state="disable")   
+            img=Image.frombytes("L",(128,128),database['default_image'])
+            avata=ImageTk.PhotoImage(img)
+            avatar_label=Label(canvas1,image=avata)
+            avatar_label.image=avata
+            avatar_label.place(x=340,y=17)               
             
         else:
             
@@ -644,6 +731,22 @@ def update_record():
             add.focus_force()    
             reg_box.focus_set()
                   
+    def Add_Image():
+        
+        myFormats=[('JPEG / JFIF','*.jpg'),('Portable Network Graphics','*.png'),('Windows Bitmap','*.bmp'),]
+        path=askopenfile(title="Open Image",filetypes=myFormats) 
+        add.focus_force()
+
+        try:
+        
+            client=Image.open(path.name).resize((128,128),Image.ANTIALIAS)
+            to_bytes_mode.set(client.mode)
+            to_bytes.set(client.tobytes())
+            
+            
+        except:
+            pass    
+        
     def clear_func():
         reg_box.delete(0,END)
         name_box.delete(0,END)
@@ -663,11 +766,33 @@ def update_record():
         blood_box.delete(0,END)
         dob_box.delete(0,END)
     
-    add=Tk()
+    add=Toplevel()
     add.geometry("500x445+645+143")
     add.title("Update record")
     
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    add.tk.call('wm','iconphoto',add._w,im)    
+    
     canvas1=Canvas(add,width=600,height=550)
+    
+    
+    im=Image.frombytes(database[reg_var.get()]['image'][0],(128,128),database[reg_var.get()]['image'][1])
+    avata=ImageTk.PhotoImage(im)
+    avatar_label=Label(add,image=avata)
+    avatar_label.image=avata
+    avatar_label.place(x=340,y=10,height=80) 
+    
+    to_bytes_mode=StringVar(canvas1)
+    to_bytes=StringVar(canvas1)
+    
+    to_bytes_mode.set(database[reg_var.get()]['image'][0])
+    to_bytes.set(database[reg_var.get()]['image'][1])
+
+    img_butt=Button(canvas1,text="Add Image",command=Add_Image)
+    img_butt.place(x=370,y=100)    
+    
+    
     
     regno=Label(canvas1,text="Reg No")
     regno.place(x=20,y=15)
@@ -889,17 +1014,23 @@ Type['menu'].add_checkbutton(label="IV Year",onvalue=True,offvalue=False,variabl
 
 variable=StringVar(search)
 yy=set(sorted([int(i[:4]) for i in database.keys() if i.isdigit()]))
-strt=min(yy)
 years=[]
-for i in range(strt,int(current_year)+1):
-    years.append(str(i)+"-"+str(i+1))
+try:
+    strt=min(yy)
+    for i in range(strt,int(current_year)+1):
+        years.append(str(i)+"-"+str(i+1))
+except:
+    years.append("2016-2017")
 variable=StringVar(search)
 for i in years:
     if current_year in i:
         j=[int(k) for k in i.split('-')]
         if int(current_year) >=j[0] and int(current_year)>=j[1]:
             my_year=i
-variable.set(my_year)
+try:
+    variable.set(my_year)
+except:
+    variable.set("2016-2017")
 year=OptionMenu(search,variable,*years)
 year.place(x=785,y=4)
 
@@ -951,12 +1082,9 @@ reg_var=StringVar(canvas1)
 reg_box=Label(canvas1,textvariable=reg_var)
 reg_box.place(x=200,y=15)
 
-#f__=Image.open("D:\\Program_Files\Python\Database_Management_Software\default.png").resize((128,128)).convert('L')
 
 img=Image.frombytes("L",(128,128),database['default_image'])
-
 avata=ImageTk.PhotoImage(img)
-
 avatar_label=Label(canvas1,image=avata)
 avatar_label.image=avata
 avatar_label.place(x=340,y=17)
@@ -1068,10 +1196,14 @@ def key_bindings():  # Control+k or Control +K function
       
     '''
     
-    key=Tk()
+    key=Toplevel()
     key.title("KeyBoard Shortcuts")
     key.geometry("350x300+300+200")
     key.resizable(0,0)
+    
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    key.tk.call('wm','iconphoto',key._w,im)    
     
     shortcut=Label(key,text="")
     shortcut.pack()
@@ -1127,19 +1259,27 @@ def about():  # Alt+a or Alt+A function
             stri="https://www.google.co.in"
             data=urlopen(stri)            
             save_file=asksaveasfile(mode='w', defaultextension=".py")
+            files=urlopen("https://raw.githubusercontent.com/VaasuDevanS/Database_SQC/master/main.py")
             if save_file:
-                save_file.write("vasu")
+                for line in files:
+                    save_file.write(line)
                 save_file.close()
+            msgbox.showinfo("Success",message="Saved Successfully..")
+            files.close()
             about.destroy()
             app.focus_force()
         except:
             msgbox.showerror("Error",message="Requires internet connection")
             about.focus_force()
     
-    about=Tk()
+    about=Toplevel()
     about.title("About")
     about.geometry("600x115+300+300")
     about.resizable(0,0)
+    
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    about.tk.call('wm','iconphoto',about._w,im)    
     
     desc0=Label(about,text="This Software is used to manage the students database for the Students Quality Council.")
     desc0.pack()
@@ -1176,7 +1316,67 @@ def developer():   #Control+Alt+D function
     '''
     
     def vaasu_view():
-        dev.destroy()
+        
+        my_no='2014107051'
+                         
+        stu_year=int(my_no[:4])
+        a,b,c,d,e=range(stu_year,stu_year+5)
+        
+        a_b=Label(canvas1,text=str(a)+"-"+str(b)+" (I Year)")
+        a_b.place(x=20,y=295)
+        a_b.configure(foreground="blue")
+                
+        a_b_label=Label(canvas1,textvariable=a_b_var)
+        a_b_label.place(x=200,y=295) 
+        
+        b_c=Label(canvas1,text=str(b)+"-"+str(c)+" (II Year)")
+        b_c.place(x=20,y=330)
+        b_c.configure(foreground="blue")         
+        
+        b_c_label=Label(canvas1,textvariable=b_c_var)
+        b_c_label.place(x=200,y=330)   
+        
+        c_d=Label(canvas1,text=str(c)+"-"+str(d)+" (III Year)")
+        c_d.place(x=20,y=365)
+        c_d.configure(foreground="blue")
+        
+        c_d_label=Label(canvas1,textvariable=c_d_var)            
+        c_d_label.place(x=200,y=365)
+        
+        d_e=Label(canvas1,text=str(d)+"-"+str(e)+" (IV Year)")
+        d_e.place(x=20,y=400)
+        d_e.configure(foreground="blue")
+        
+        d_e_label=Label(canvas1,textvariable=d_e_var)            
+        d_e_label.place(x=200,y=400)
+        
+        other_info.place(x=200,y=435,width=280,height=40)
+        reg_var.set(my_no)
+        name_var.set(database[my_no]['name'])
+        dept_var.set(database[my_no]['dept'])
+        con_var.set(database[my_no]['contact'])
+        mail_var.set(database[my_no]['email'])
+        native_var.set(database[my_no]['native'])
+        hds_var.set(database[my_no]["hos_days"])
+        au_var.set(database[my_no]["act_unact"])
+        a_b_var.set(database[my_no]['year']["1"].values()[0])
+        b_c_var.set(database[my_no]['year']["2"].values()[0])
+        c_d_var.set(database[my_no]['year']["3"].values()[0])
+        d_e_var.set(database[my_no]['year']["4"].values()[0])
+        other_info.insert(END,database[my_no]['other'])
+        other_info.config(state="disable")
+        blood_var.set(database[my_no]['blood'])
+        dob_var.set(database[my_no]['dob'])      
+        
+        try:
+            img=Image.frombytes(database[my_no]['image'][0],(128,128),database[my_no]['image'][1])
+            avata=ImageTk.PhotoImage(img)
+            avatar_label=Label(canvas1,image=avata)
+            avatar_label.image=avata 
+            avatar_label.place(x=340,y=17)
+            
+        except:
+            pass     
         
     def profile_view():
         try:
@@ -1187,10 +1387,14 @@ def developer():   #Control+Alt+D function
             msgbox.showerror("Error",message="Requires Internet Conection")
             dev.focus_force()
     
-    dev=Tk()
+    dev=Toplevel()
     dev.geometry("300x87+300+300")
     dev.resizable(0,0)
     dev.title("Developer")
+    
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    dev.tk.call('wm','iconphoto',dev._w,im)    
     
     name=Label(dev,text="Name:  Vaasu Devan S")
     name.pack()
