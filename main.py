@@ -12,7 +12,7 @@
                (Got using datetime.ctime(datetime.now())) LOL :-)
                
     
-    modified: 
+    modified:  'Tue Jan 24 17:35:09 2017' 
       (last)
       
     Main TimeLine:
@@ -25,11 +25,14 @@
     6. 'Mon Jan 23 08:37:02 2017' ------ > Results label was added and fixed some bugs in result Display and Gender column was added.
     7. 'Mon Jan 23 17:01:22 2017' ------ > Search result algorithm was added and fixed some bugs in saving the year data.
     8. 'Tue Jan 24 12:54:16 2017' ------ > Photo algorithms were added and made the source code available in GitHub.
+    9. 'Tue Jan 24 17:35:09 2017' ------ > Saving results window was added and the project was ready to be exposed. :-)
 
     Developed using Python 2.7.12 on Windows 8.1 64-bit os
     IDE Used: Wingware python IDE 101 v.5.1.12-1 (Free version).
     
     Copyrights: No copyrights and nothing. Anybody can modify and use it for their own requirements.
+    
+    converted to .exe using pyinstaller.
     
     viewed best in any text editing software that understands Python particularly in fullscreen(for comments).
     Eg. Python IDLE,Notepad++,notepad2,wingware IDE,Eclipse.
@@ -44,7 +47,7 @@
 # (Built-in)         No Worries
 from Tkinter import Tk,Frame,Label,Button,Entry,Listbox,Menu,Scrollbar,OptionMenu,StringVar,BooleanVar,END,Canvas,Radiobutton,Checkbutton,Text,ACTIVE,Toplevel
 import tkMessageBox as msgbox
-from tkFileDialog import askopenfile,asksaveasfile,askdirectory
+from tkFileDialog import askopenfile,asksaveasfile,askdirectory,asksaveasfilename
 from tkFont import Font
 from datetime import datetime
 import os,shelve,webbrowser
@@ -55,26 +58,34 @@ import StringIO
 # (Third party modules)
 ''' 
     Third party modules can be downloaded using pip or from the website 
-    "http://www.lfd.uci.edu/~gohlke/pythonlibs/"    
+    "http://www.lfd.uci.edu/~gohlke/pythonlibs/"   
     
-    pip install PILLOW numpy
+    (or)
+    
+    You can download from the repo itself
+    
+    (or)
+    
+    pip install PILLOW xlwt
+    
 '''
 from PIL import Image,ImageTk  # PIL---> Python Imaging Library
-import numpy as np
-
+from xlwt import Workbook
 
 # Module Uses (Quick Glance)
 '''
+
    * Tkinter,tkMessageBox,tkFileDialog,tkFont -------> GUI packages (In python 3, all belong to the same module 'tkinter')
    * datetime                                 -------> date & time (also Year) management
    * OS                                       -------> for creating files and folders
-   * shelve                                   -------> for managing the database file (shelve comes to the rescue)
-   * PIL                                      -------> for handling images of students   
+   * shelve                                   -------> for managing the database file (shelve comes to the rescue) 
    * webbrowser                               -------> for opening the webbrowser and displaying the content
    * urllib                                   -------> for checking the internet connection
    * re                                       -------> for string manipulations
+   * PIL  (3.4.2)                             -------> for handling images of students  
+   * xlwt (1.2.0)                             -------> for saving the data to excel file
+   
 '''
-
 
 # Window
 
@@ -85,8 +96,7 @@ app.title(title)
 app.resizable(0,0)               # I Don't want the window to be resized. Also it will disable the maximize button
 app.geometry("1000x610+200+40")  # width X height + from-left + from-top
 
-
-
+vaasu_results=[]
 
 try:
     os.mkdir("D:\\Database")
@@ -106,7 +116,6 @@ database=shelve.open("Database.sqc")       # Opening the Connection between the 
 icon=Image.frombytes("RGBA",(256,256),database['icon'])
 im=ImageTk.PhotoImage(icon)
 app.tk.call('wm','iconphoto',app._w,im)
-
 
 def clear(): # Control+l or Control+L function
     text_box.delete(0,END)
@@ -139,7 +148,186 @@ def clear(): # Control+l or Control+L function
     avatar_label.place(x=340,y=17)    
     
 def save_result():
-    pass
+    
+    '''
+       To save the results to excel file
+       
+    '''
+    
+    def names():
+        
+        book=Workbook()
+        sheet1=book.add_sheet("Sheet1")
+        
+        row=sheet1.row(1)
+        row.write(1,"Reg_nos") 
+        row.write(2,"Name")
+        
+        vresults=vaasu_results[1]
+        YY=[i for i in database if i.isdigit()]
+        
+        for j,i in enumerate(vresults,start=4):
+            row=sheet1.row(j)
+            for k in YY:
+                if database[k]["name"]==i:
+                    my_no=k   
+                    break
+            try:
+                
+                row.write(1,my_no)
+                row.write(2,i)
+                del my_no
+                
+            except:row.write(0,i)
+
+        file_name=asksaveasfilename(title="Enter only file name..")
+        
+        if file_name:
+            if not file_name.endswith('.xls'):
+                book.save(file_name+".xls")
+            else:
+                book.save(file_name)
+            msgbox.showinfo("Success",message="Saved Successfully..")
+            
+        else:
+            pass
+        
+        save.focus_force()
+
+    def all_details():
+        
+        #data={"name":name_box.get(),"dept":dept_box.get(),"contact":contact_box.get(),"email":mail_box.get(),"native":native_box.get(),"other":otherrr,"image":[str(to_bytes_mode.get()),str(to_bytes.get())],"gender":m_f.get(),"act_unact":act_unact.get(),"hos_days":hos_day.get(),"dob":dob_box.get(),"blood":blood_box.get(),"year":{"1":{a_b_va.get():a_b_box.get()},"2":{b_c_va.get():b_c_box.get()},"3":{c_d_va.get():c_d_box.get()},"4":{d_e_va.get():d_e_box.get()}}}
+        
+        book=Workbook()
+        sheet1=book.add_sheet("Sheet1")
+        
+        row=sheet1.row(1)
+        row.write(1,"Reg_nos") 
+        row.write(2,"Name")
+        row.write(3,"Contact")
+        row.write(4,"Email")
+        row.write(5,"Department")
+        row.write(6,"Native")
+        row.write(7,"Hosteller/Days-scholar")
+        row.write(8,"Date of Birth")
+        row.write(9,"Blood Group")
+        row.write(10,"First_year")
+        row.write(11,"Second_year")
+        row.write(12,"Third_year")
+        row.write(13,"Fourth_year")
+        row.write(14,"Other")
+        
+        vresults=vaasu_results[1]
+        YY=[i for i in database if i.isdigit()]
+        
+        for j,i in enumerate(vresults,start=4):
+            row=sheet1.row(j)
+            for k in YY:
+                if database[k]["name"]==i:
+                    my_no=k   
+                    break
+            try:
+                
+                row.write(1,my_no)
+                row.write(2,i)
+                row.write(3,database[my_no]['contact'])
+                row.write(4,database[my_no]['email'])
+                row.write(5,database[my_no]['dept'])
+                row.write(6,database[my_no]['native'])
+                row.write(7,database[my_no]['hos_days'])
+                row.write(8,database[my_no]["dob"])
+                row.write(9,database[my_no]["blood"])
+                row.write(10,database[my_no]["year"]["1"].values())
+                row.write(11,database[my_no]["year"]["2"].values())
+                row.write(12,database[my_no]["year"]["3"].values())
+                row.write(13,database[my_no]["year"]["4"].values())
+                row.write(14,database[my_no]["other"])
+                              
+                del my_no
+                
+            except:row.write(0,i)
+
+        file_name=asksaveasfilename(title="Enter only file name..")
+        
+        if file_name:
+            if not file_name.endswith('.xls'):
+                book.save(file_name+".xls")
+            else:
+                book.save(file_name)
+            msgbox.showinfo("Success",message="Saved Successfully..")
+            
+        else:
+            pass
+        
+        save.focus_force()                
+    
+    def no_email():
+        
+        book=Workbook()
+        sheet1=book.add_sheet("Sheet1")
+        
+        row=sheet1.row(1)
+        row.write(1,"Reg_nos") 
+        row.write(2,"Name")
+        row.write(3,"Contact")
+        row.write(4,"Email")
+        
+        vresults=vaasu_results[1]
+        YY=[i for i in database if i.isdigit()]
+        
+        for j,i in enumerate(vresults,start=4):
+            row=sheet1.row(j)
+            for k in YY:
+                if database[k]["name"]==i:
+                    my_no=k   
+                    break
+            try:
+                
+                row.write(1,my_no)
+                row.write(2,i)
+                row.write(3,database[my_no]['contact'])
+                row.write(4,database[my_no]['email'])
+                del my_no
+                
+            except:row.write(0,i)
+
+        file_name=asksaveasfilename(title="Enter only file name..")
+        
+        if file_name:
+            if not file_name.endswith('.xls'):
+                book.save(file_name+".xls")
+            else:
+                book.save(file_name)
+            msgbox.showinfo("Success",message="Saved Successfully..")
+            
+        else:
+            pass
+        
+        save.focus_force()        
+    
+    save=Toplevel()
+    save.resizable(0,0)
+    save.title("Default with Reg No..!")
+    
+    icon=Image.frombytes("RGBA",(256,256),database['icon'])
+    im=ImageTk.PhotoImage(icon)    
+    save.tk.call('wm','iconphoto',save._w,im)  
+    
+    save.geometry("300x105+220+470")
+    save.focus_force()
+    
+    all_details=Button(save,text="Save all Results..",command=all_details)
+    all_details.place(x=0,y=5,width=300)
+    
+    no_email=Button(save,text="Save Mob number and email id..",command=no_email)
+    no_email.place(x=0,y=40,width=300)
+    
+    names=Button(save,text="Names..",command=names)
+    names.place(x=0,y=75,width=300)
+        
+    flag=save.bind("<Escape>",lambda *ignore:save.destroy())
+    
+    save.mainloop()
 
 def add_record():
     '''
@@ -164,7 +352,11 @@ def add_record():
         hos_day.set(None)
         m_f.set(None)
         act_unact.set(None)
-    
+        im=Image.frombytes("L",(128,128),database['default_image'])
+        avata=ImageTk.PhotoImage(im)
+        avatar_label=Label(add,image=avata)
+        avatar_label.image=avata
+        avatar_label.place(x=340,y=10,height=80)         
     
     def save_record():
         
@@ -182,7 +374,6 @@ def add_record():
             msgbox.showerror("Error",message="Fields can't be empty.")
             add.focus_force()
     
-
     add=Toplevel()
     add.geometry("500x445+645+142")
     add.title("Insert new record")
@@ -199,11 +390,14 @@ def add_record():
             to_bytes_mode.set(str(client.mode))
             to_bytes.set(client.tobytes())
             
+            avata=ImageTk.PhotoImage(client)
+            avatar_label=Label(add,image=avata)
+            avatar_label.image=avata
+            avatar_label.place(x=340,y=10,height=80)             
             
         except:
             pass
-        
-    
+            
     canvas1=Canvas(add,width=600,height=550)
     
     regno=Label(canvas1,text="Reg No")
@@ -238,9 +432,7 @@ def add_record():
     
     name_box=Entry(canvas1)
     name_box.place(x=100,y=50)
-    
-    
-    
+        
     dept=Label(canvas1,text="Department")
     dept.place(x=20,y=85)
     
@@ -334,7 +526,6 @@ def add_record():
     c_d_va=StringVar(canvas1)
     d_e_va=StringVar(canvas1)
     
-    
     def click():
         '''
            Registration number needs to be verified.
@@ -358,15 +549,13 @@ def add_record():
             b_c.place(x=20,y=295)
                         
             b_c_box.place(x=100,y=295,width=200)   
-            
-            
+                        
             c_d_va.set(str(c)+"-"+str(d))
             c_d=Label(canvas1,textvariable=c_d_va)
             c_d.place(x=20,y=330)
                         
             c_d_box.place(x=100,y=330,width=200)
-            
-            
+                        
             d_e_va.set(str(d)+"-"+str(e))
             d_e=Label(canvas1,textvariable=d_e_va)
             d_e.place(x=20,y=365)
@@ -409,8 +598,11 @@ def add_record():
     
     add.mainloop()
 
-
 def show_result(*ignore):
+    
+    '''
+           Function for Displaying result
+    '''
     
     try:
         
@@ -418,7 +610,6 @@ def show_result(*ignore):
         delete.config(state="normal")        
         name=list_box.get(ACTIVE)
         
-    
         for i in database:
             if database[i]["name"]==name:
                 my_no=i   
@@ -454,8 +645,7 @@ def show_result(*ignore):
         
         d_e_label=Label(canvas1,textvariable=d_e_var)            
         d_e_label.place(x=200,y=400)
-        
-        other_info.place(x=200,y=435,width=280,height=40)
+               
         reg_var.set(my_no)
         name_var.set(database[my_no]['name'])
         dept_var.set(database[my_no]['dept'])
@@ -468,6 +658,8 @@ def show_result(*ignore):
         b_c_var.set(database[my_no]['year']["2"].values()[0])
         c_d_var.set(database[my_no]['year']["3"].values()[0])
         d_e_var.set(database[my_no]['year']["4"].values()[0])
+        other_info.config(state="normal")
+        other_info.delete("1.0",END)
         other_info.insert(END,database[my_no]['other'])
         other_info.config(state="disable")
         blood_var.set(database[my_no]['blood'])
@@ -483,12 +675,16 @@ def show_result(*ignore):
         except:
             pass
         
-        
     except:
         
         msgbox.showerror("Error",message="Select valid record..")
         
 def search_result():
+    
+    adv.grid(row=2,column=0)
+    
+    flag=app.bind("<Alt r>",lambda *ignore:save_result()) 
+    flag=app.bind("<Alt R>",lambda *ignore:save_result())               # Save the results      
     
     list_box.delete(0,END)
     reg_var.set("")
@@ -512,6 +708,11 @@ def search_result():
     adv.config(state="disable")
     update.config(state="disable")
     delete.config(state="disable")    
+    img=Image.frombytes("L",(128,128),database['default_image'])
+    avata=ImageTk.PhotoImage(img)
+    avatar_label=Label(canvas1,image=avata)
+    avatar_label.image=avata
+    avatar_label.place(x=340,y=17)    
     
     key_word=text_box.get().split()
     key_word=[i.lower() for i in key_word]
@@ -536,8 +737,7 @@ def search_result():
                         if j in total_data:
                             YY['I Year'].append(i)
                 else:
-                    YY['I Year'].append(i)            
-            
+                    YY['I Year'].append(i)                        
 
             if given_year==database[i]['year']['2'].keys()[0]:
                 if len(key_word)!=0:
@@ -545,8 +745,7 @@ def search_result():
                         if j in total_data:
                             YY['II Year'].append(i)
                 else:               
-                    YY['II Year'].append(i)  
-                    
+                    YY['II Year'].append(i)                      
                     
             if given_year==database[i]['year']['3'].keys()[0]:
                 if len(key_word)!=0:
@@ -608,8 +807,7 @@ def search_result():
     YY['II Year']=list(set(YY['II Year']))
     YY['III Year']=list(set(YY['III Year']))
     YY['IV Year']=list(set(YY['IV Year']))
-    
-    
+        
     if len(YY['I Year'])!=0:
         bresults.append("  First Year")
         for i in YY['I Year']:
@@ -637,23 +835,19 @@ def search_result():
     try:
         i1=bresults.index("  First Year")
         list_box.itemconfig(i1,{'fg':'blue'})
-    except:
-        pass
+    except:pass
     try:
         i2=bresults.index("  Second Year")
         list_box.itemconfig(i2,{'fg':'blue'})
-    except:
-        pass
+    except:pass
     try:
         i3=bresults.index("   Third Year")
         list_box.itemconfig(i3,{'fg':'blue'})
-    except:
-        pass
+    except:pass
     try:
         i4=bresults.index("  Fourth Year")
         list_box.itemconfig(i4,{'fg':'blue'})
-    except:
-        pass
+    except:pass
     
     results=[]+bresults
     try:results.remove("  First Year")
@@ -667,8 +861,7 @@ def search_result():
     
     try:results.remove("  Fourth Year")
     except:pass    
-    
-        
+            
     found_var.set("Found "+str(len(results))+" / "+str(total))
     
     if len(bresults)==0:
@@ -677,6 +870,9 @@ def search_result():
         update.config(state="disable")   
     else:
         adv.config(state="normal")
+        
+    vaasu_results.append(YY)
+    vaasu_results.append(bresults)
         
     list_box.bind('<Double Button-1>',show_result)  
 
@@ -697,34 +893,8 @@ def update_record():
             
             msgbox.showinfo("Confirmation..",message="Updated Successfully..")
             add.destroy()        
-            list_box.delete(0,END)
-            reg_var.set("")
-            name_var.set("")
-            dept_var.set("")
-            con_var.set("")
-            mail_var.set("")
-            native_var.set("")
-            hds_var.set("")
-            au_var.set("")
-            a_b_var.set("")
-            b_c_var.set("")
-            c_d_var.set("")
-            d_e_var.set("")
-            other_info.config(state="normal")
-            other_info.delete("1.0",END)
-            blood_var.set("")
-            dob_var.set("")
-            found_var.set("Found : ")
-            text_box.focus_force()
-            adv.config(state="disable")
-            update.config(state="disable")
-            delete.config(state="disable")   
-            img=Image.frombytes("L",(128,128),database['default_image'])
-            avata=ImageTk.PhotoImage(img)
-            avatar_label=Label(canvas1,image=avata)
-            avatar_label.image=avata
-            avatar_label.place(x=340,y=17)               
-            
+            clear()          
+                                       
         else:
             
             msgbox.showerror("Error",message="Fields can't be empty.")
@@ -743,9 +913,7 @@ def update_record():
             to_bytes_mode.set(client.mode)
             to_bytes.set(client.tobytes())
             
-            
-        except:
-            pass    
+        except:pass    
         
     def clear_func():
         reg_box.delete(0,END)
@@ -765,6 +933,12 @@ def update_record():
         m_f.set(None)
         blood_box.delete(0,END)
         dob_box.delete(0,END)
+        
+        im=Image.frombytes("L",(128,128),database['default_image'])
+        avata=ImageTk.PhotoImage(im)
+        avatar_label=Label(add,image=avata)
+        avatar_label.image=avata
+        avatar_label.place(x=340,y=10,height=80)         
     
     add=Toplevel()
     add.geometry("500x445+645+143")
@@ -775,7 +949,6 @@ def update_record():
     add.tk.call('wm','iconphoto',add._w,im)    
     
     canvas1=Canvas(add,width=600,height=550)
-    
     
     im=Image.frombytes(database[reg_var.get()]['image'][0],(128,128),database[reg_var.get()]['image'][1])
     avata=ImageTk.PhotoImage(im)
@@ -791,9 +964,7 @@ def update_record():
 
     img_butt=Button(canvas1,text="Add Image",command=Add_Image)
     img_butt.place(x=370,y=100)    
-    
-    
-    
+        
     regno=Label(canvas1,text="Reg No")
     regno.place(x=20,y=15)
     
@@ -922,6 +1093,7 @@ def update_record():
     status.place(x=225,y=15)  
     
     try:
+        
         his_year=int(no[:4])
         a,b,c,d,e=range(his_year,his_year+5)
         
@@ -971,7 +1143,6 @@ def delete_record():
         if msgbox.askyesno("Deletion",message="Are you sure you want to delete the record. This can't be undone.."):
             del database[reg_var.get()]
             clear()
-
     
 # SearchBar Frame
 
@@ -981,7 +1152,6 @@ search.grid(ipadx=200)
 text_box=Entry(search,width=100)    # Creation of text box
 text_box.grid(padx=30,pady=10,row=0,column=0)
 text_box.focus_set()                # Function explains
-
 
 var=StringVar(search)
 var.set("Category")
@@ -1014,28 +1184,29 @@ Type['menu'].add_checkbutton(label="IV Year",onvalue=True,offvalue=False,variabl
 
 variable=StringVar(search)
 yy=set(sorted([int(i[:4]) for i in database.keys() if i.isdigit()]))
+current_month=datetime.now().month
 years=[]
 try:
     strt=min(yy)
     for i in range(strt,int(current_year)+1):
         years.append(str(i)+"-"+str(i+1))
 except:
-    years.append("2016-2017")
+    years.append(str(current_year)+"-"+str(int(current_year+1)))
 variable=StringVar(search)
+j=[]
 for i in years:
     if current_year in i:
-        j=[int(k) for k in i.split('-')]
-        if int(current_year) >=j[0] and int(current_year)>=j[1]:
-            my_year=i
-try:
-    variable.set(my_year)
-except:
-    variable.set("2016-2017")
+        j.append(i)
+if current_month<=4:my_year=j[0]
+else:my_year=j[1]
+variable.set(my_year)
+
 year=OptionMenu(search,variable,*years)
 year.place(x=785,y=4)
 
 search_button=Button(search,text="Search",command=search_result,underline=0)
 search_button.place(x=888,y=5,width=70,height=28)
+
 # Results Frame
 
 result=Frame(app,width=1000,height=1000)       
@@ -1057,7 +1228,6 @@ scroll.configure(command=list_box.yview)
 list_box.configure(yscrollcommand=scroll.set)
 
 adv=Button(result,text="Save Results",command=save_result,underline=5)
-adv.grid(row=2,column=0)
 
 # Canvas                 
 
@@ -1082,13 +1252,11 @@ reg_var=StringVar(canvas1)
 reg_box=Label(canvas1,textvariable=reg_var)
 reg_box.place(x=200,y=15)
 
-
 img=Image.frombytes("L",(128,128),database['default_image'])
 avata=ImageTk.PhotoImage(img)
 avatar_label=Label(canvas1,image=avata)
 avatar_label.image=avata
 avatar_label.place(x=340,y=17)
-
 
 name=Label(canvas1,text="Name")
 name.place(x=20,y=50)
@@ -1172,6 +1340,7 @@ other_label.place(x=20,y=435)
 other_label.configure(foreground="blue")
 
 other_info=Text(canvas1)
+other_info.place(x=200,y=435,width=280,height=40)
 
   # Buttons for Updation and Deletion
 
@@ -1188,14 +1357,12 @@ if len(reg_var.get())==0:
     update.config(state="disable")
     delete.config(state="disable")
 
-
 def key_bindings():  # Control+k or Control +K function
     
     '''
       Creation of a small window that shows information about the keyboard shortcuts available.
       
-    '''
-    
+    '''   
     key=Toplevel()
     key.title("KeyBoard Shortcuts")
     key.geometry("350x300+300+200")
@@ -1258,7 +1425,7 @@ def about():  # Alt+a or Alt+A function
         try:
             stri="https://www.google.co.in"
             data=urlopen(stri)            
-            save_file=asksaveasfile(mode='w', defaultextension=".py")
+            save_file=asksaveasfile(title="Enter only the file name..",mode='w', defaultextension=".py")
             files=urlopen("https://raw.githubusercontent.com/VaasuDevanS/Database_SQC/master/main.py")
             if save_file:
                 for line in files:
@@ -1369,14 +1536,14 @@ def developer():   #Control+Alt+D function
         dob_var.set(database[my_no]['dob'])      
         
         try:
+            
             img=Image.frombytes(database[my_no]['image'][0],(128,128),database[my_no]['image'][1])
             avata=ImageTk.PhotoImage(img)
             avatar_label=Label(canvas1,image=avata)
             avatar_label.image=avata 
             avatar_label.place(x=340,y=17)
             
-        except:
-            pass     
+        except:pass     
         
     def profile_view():
         try:
@@ -1420,7 +1587,20 @@ def developer():   #Control+Alt+D function
     flag=dev.bind("<Escape>",lambda *ignore:dev.destroy())
     dev.mainloop()    
 
-
+def Easter_Egg():
+    
+    a=dir_path=askdirectory()
+    os.chdir(a)
+    os.mkdir("Easter_Egg_Result...")
+    os.chdir(a+"\\"+"Easter_Egg_Result...")
+    my_nos=[i for i in database if i.isdigit()]
+    for i in my_nos:
+        im=Image.frombytes(database[i]['image'][0],(128,128),database[i]['image'][1])
+        file_name=database[i]['gender'][0]+"_"+database[i]['name']+"_"+database[i]['contact']+"_"+database[i]['native']+"_"+database[i]['hos_days']+"_"+database[i]['dob']+"_"+database[i]['blood']+"_"+i+database[i]['dept']
+        im.save(str(file_name)+".jpg")
+        
+    msgbox.showerror("")
+    
 # Keyboard Shortcut Bindings
 # flag variable is used to get the return values of the bind function
 
@@ -1448,9 +1628,6 @@ flag=app.bind("<Alt U>",lambda *ignore:update_record())             # Update
 flag=app.bind("<Alt d>",lambda *ignore:delete_record()) 
 flag=app.bind("<Alt D>",lambda *ignore:delete_record())             # Delete
 
-flag=app.bind("<Alt r>",lambda *ignore:save_result()) 
-flag=app.bind("<Alt R>",lambda *ignore:save_result())               # Save the results  
-
 flag=app.bind("<Control Alt G>",lambda *ignore:Easter_Egg())        # Easter Egg... !
 flag=app.bind("<Control Alt D>",lambda *ignore:developer())         # To show info about the developer
 flag=app.bind("<Escape>",lambda *ignore:app.iconify())              # Minimizes the window by pressing the Escape button
@@ -1477,7 +1654,6 @@ menubar.add_cascade(label="About",menu=filemenu2,underline=1)
 
 app.focus_force()                # Making the application window active
 app.mainloop()   # To make window Running until close button is pressed
-
 
 database.close()                 # Closing the Connection between the database file and the program
 
