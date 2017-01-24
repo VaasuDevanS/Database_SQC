@@ -9,6 +9,6 @@ default_image.. i just got from my search engine(Duck Duck go)
 
 No copyrights. Anyone who has deep understanding in Tkinter and python can modify the code and re publish to his own wish and own requirement.
 
-Written using Wing IDE using Python 2.7.12 on windows 8.1 os
+View the Development log.pdf to see the screenshots and also the images used.
 
 To know more about Students Quality Council visit : [click here](http://cqm.annauniv.edu/)
