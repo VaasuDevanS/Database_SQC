@@ -32,7 +32,7 @@
     
     Copyrights: No copyrights and nothing. Anybody can modify and use it for their own requirements.
     
-    converted to .exe using pyinstaller.
+    converted to .exe using pyinstaller (3.2.1).
     
     viewed best in any text editing software that understands Python particularly in fullscreen(for comments).
     Eg. Python IDLE,Notepad++,notepad2,wingware IDE,Eclipse.
